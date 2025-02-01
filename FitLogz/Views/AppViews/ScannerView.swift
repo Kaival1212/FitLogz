@@ -3,143 +3,112 @@ import VisionKit
 
 struct ScannerView: View {
     @State private var isPresentingScanner = false
+    @State private var isPresentingManualAdd = false
     @State var scannedCode: String = ""
-    private var openfoodfactsApi : OpenFoodFactsApi = OpenFoodFactsApi()
-    @State var scannedFood: Product? = nil
+    @State var scannedFood: ProductNutriments? = nil
+    @State var error: String? = nil
+    @State var textCode: String = ""
+    var user : User? = AuthConnect.Singleton.user
     
     var body: some View {
         ZStack() {
             Color.backGround
                 .ignoresSafeArea(.all)
+            
             ScrollView {
                 HeaderView()
-                
+    
                 VStack {
-                    Button(action: {
-                        isPresentingScanner = true
-                    }) {
-                        HStack {
-                            Image(systemName: "barcode.viewfinder")
-                                .resizable()
-                                .foregroundStyle(Color.defPrimary)
-                                .frame(width: 30, height: 30)
-                                .padding(.vertical)
-                            Text("Scan")
-                                .foregroundStyle(Color.defPrimary)
-                                .font(.headline)
-                                .padding(.vertical)
+                    NurtitionGoals()
+                        .padding(.top , 15)
+
+                    HStack {
+                        Button(action: {
+                            isPresentingScanner = true
+                        }) {
+                            HStack {
+                                Image(systemName: "barcode.viewfinder")
+                                    .resizable()
+                                    .foregroundStyle(Color.defPrimary)
+                                    .frame(width: 25, height: 25)
+                                Text("Scan Barcode")
+                                    .foregroundStyle(Color.defPrimary)
+                                    .font(.headline)
+                            }
+                            .padding(.horizontal)
+                            .padding(.vertical, 10)
+                            .background(Color.defSecondary)
+                            .cornerRadius(30)
                         }
-                        .padding(.horizontal,80)
-                        .background(Color.defSecondary)
-                        .cornerRadius(30)
-
-
-                    }
-                    .sheet(isPresented: $isPresentingScanner){
-                        DocumentScannerView(scannedCode: $scannedCode, isPresented: $isPresentingScanner)
-                    }
+                        
+                        Divider()
+                        
+                        Button(action: {
+                            isPresentingManualAdd = true
+                        }) {
+                            HStack {
+                                Image(systemName: "plus.app")
+                                    .resizable()
+                                    .foregroundStyle(Color.defPrimary)
+                                    .frame(width: 25, height: 25)
+                                Text("Add Manually")
+                                    .foregroundStyle(Color.defPrimary)
+                                    .font(.headline)
+                            }
+                            .padding(.horizontal)
+                            .padding(.vertical, 10)
+                            .background(Color.defSecondary)
+                            .cornerRadius(30)
+                        }
+                    }.padding()
                     
-                    if !scannedCode.isEmpty && (scannedFood != nil) {
-                        NutrimentsView(product: scannedFood!)
-                    }
+                }.sheet(isPresented: $isPresentingScanner){
+                    BarcodeScannerView(scannedCode: $scannedCode, isPresented: $isPresentingScanner)
                 }
-            }
-        }.onChange(of: scannedCode){
-            Task {
-                do {
-                    scannedFood = try await openfoodfactsApi.getProductDetails(productId: scannedCode)
-                    print(scannedFood ?? "No product found")
-                } catch {
-                    print("Error fetching product details: \(error)")
+                .sheet(isPresented: $isPresentingManualAdd){
+                    
                 }
+
             }
+        }
+        .onChange(of: isPresentingScanner){
+            error=nil
+        }
+        .refreshable {
+            print("sds")
         }
     }
 }
 
-struct DocumentScannerView: UIViewControllerRepresentable {
-    @Binding var scannedCode: String
-    @Binding var isPresented: Bool
-    @State var showScanButton: Bool = false
-    var tempScannedCode: String = ""
-    
-    func updateUIViewController(_ uiViewController: DataScannerViewController, context: Context) {
-        if let button = uiViewController.view.subviews.first(where: { $0 is UIButton }) as? UIButton {
-            button.isEnabled = showScanButton
-            button.alpha = showScanButton ? 1.0 : 0.5
-        }
-    }
-    
-    var scannerViewController: DataScannerViewController = DataScannerViewController(
-        recognizedDataTypes: [.barcode()],
-        qualityLevel: .accurate,
-        recognizesMultipleItems: false,
-        isHighFrameRateTrackingEnabled: false,
-        isHighlightingEnabled: true
-    )
-    
-    func makeUIViewController(context: Context) -> DataScannerViewController {
-        scannerViewController.delegate = context.coordinator
-        try? scannerViewController.startScanning()
-        
-        let scanButton = UIButton(type: .system)
-        scanButton.backgroundColor = UIColor(named: "defPrimary")
-        scanButton.setTitle("Select Barcode", for: .normal)
-        scanButton.titleLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
-        scanButton.setTitleColor(.white, for: .normal)
-        scanButton.setTitleColor(.gray, for: .disabled)
-        scanButton.layer.cornerRadius = 25
-        scanButton.isEnabled = showScanButton
-        scanButton.alpha = 0.5
-        scanButton.addTarget(context.coordinator, action: #selector(Coordinator.save), for: .touchUpInside)
-        
-        // Add shadow
-        scanButton.layer.shadowColor = UIColor.black.cgColor
-        scanButton.layer.shadowOffset = CGSize(width: 0, height: 2)
-        scanButton.layer.shadowRadius = 4
-        scanButton.layer.shadowOpacity = 0.2
-        
-        scannerViewController.view.addSubview(scanButton)
-        
-        scanButton.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            scanButton.centerXAnchor.constraint(equalTo: scannerViewController.view.centerXAnchor),
-            scanButton.bottomAnchor.constraint(equalTo: scannerViewController.view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
-            scanButton.widthAnchor.constraint(equalToConstant: 200),
-            scanButton.heightAnchor.constraint(equalToConstant: 50)
-        ])
-        
-        return scannerViewController
-    }
-    
-    func makeCoordinator() -> Coordinator {
-        return Coordinator(self)
-    }
-    
-    class Coordinator: NSObject, DataScannerViewControllerDelegate {
-        var parent: DocumentScannerView
-        
-        init(_ parent: DocumentScannerView) {
-            self.parent = parent
-        }
-        
-        func dataScanner(_ dataScanner: DataScannerViewController, didAdd addedItems: [RecognizedItem], allItems: [RecognizedItem]) {
-            for item in addedItems {
-                if case let .barcode(barcode) = item, let payload = barcode.payloadStringValue {
-                    self.parent.showScanButton = true
-                    self.parent.tempScannedCode = payload
-                }
-            }
-        }
-        
-        @objc func save() {
-            self.parent.scannerViewController.stopScanning()
-            self.parent.isPresented = false
-            self.parent.scannedCode = self.parent.tempScannedCode
-        }
-    }
-}
 
 #Preview {
-    ScannerView()
+    
+    let test = ProductNutriments(
+        id: "cookie_001",
+        name: "Biscuit",
+        name_en: "Cookie",
+//        quantity: "1 pack",
+//        quantity_unit: "g",
+        image_front_small_url: "https://images.openfoodfacts.org/images/products/000/000/039/6134/front_fr.13.200.jpg",
+        carbohydrates: 61.7,
+        carbohydrates_100g: 61.7,
+        carbohydrates_serving: 61.7,
+        carbohydrates_unit: "g",
+        energy: 2155,
+        energy_kcal: 515,
+        energy_kcal_100g: 515,
+        energy_kcal_serving: 515,
+        energy_kcal_unit: "kcal",
+        fat: 27,
+        fat_100g: 27,
+        fat_serving: 27,
+        fat_unit: "g",
+        proteins: 5.6,
+        proteins_100g: 5.6,
+        proteins_serving: 5.6,
+        proteins_unit: "g"
+    )
+
+    
+    ScannerView( scannedFood: test)
 }

@@ -21,8 +21,7 @@ struct ErrorResponse: Codable {
 
 @Observable class AuthConnect {
     
-    let baseURL: URL = URL(string: "https://fitlogz.kaival.co.uk/api")!
-//    let baseURL: URL = URL(string: "http://127.0.0.1:8000/api")!
+    let baseURL: URL = ApiUrl.baseUrl   
     
     var token: String? = nil
     var error: String? = nil
@@ -55,6 +54,7 @@ struct ErrorResponse: Codable {
     
     func getToken() -> String? {
         token = UserDefaults.standard.string(forKey: "token")
+//        print(token)
         self.token = token ?? nil
         return token ?? nil
     }
@@ -62,7 +62,7 @@ struct ErrorResponse: Codable {
     func getUsersHistory(){
         
         if self.token != nil{
-            print("Getting Users History")
+ //           print("Getting Users History")
             let url = baseURL.appendingPathComponent("weights")
             var request = URLRequest(url: url)
             request.httpMethod = "GET"

@@ -18,7 +18,10 @@ struct User: Identifiable, Codable {
     let goal_weight: String
     let activity_level: String
     let daily_calories_goal: String
-    let daily_calories_limit: String
+//    let daily_calories_limit: String
+//    let daily_protein_limit: String
+//    let daily_carbs_limit: String
+//    let daily_fat_limit: String
     let daily_steps_goal: String
     let email_verified_at: String?
     let remember_token: String?

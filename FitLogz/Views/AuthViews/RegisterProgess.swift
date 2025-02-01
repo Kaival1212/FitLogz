@@ -45,6 +45,7 @@ struct RegisterProgess: View {
                 .animation(.bouncy, value: selectedTab)
             }
         }
+        .navigationBarBackButtonHidden(true)
     }
 }
 

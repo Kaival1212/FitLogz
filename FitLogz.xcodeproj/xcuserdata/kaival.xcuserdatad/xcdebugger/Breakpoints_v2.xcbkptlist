@@ -3,4 +3,22 @@
    uuid = "BD9935C6-36D2-42EF-9FA4-1133BF2789C1"
    type = "1"
    version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "6406B380-8ED1-44B7-B019-30E6407A6540"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../../../../../var/folders/s3/xc16qc61287327bpj0wplj440000gn/T/swift-generated-sources/@__swiftmacro_7FitLogz0029BarcodeScannerViewswift_tAFJhfMX106_0_33_D159C000482DC7D08B101F19BC946DA9Ll7PreviewfMf_.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1"
+            endingLineNumber = "1"
+            landmarkName = "$s7FitLogz0029BarcodeScannerViewswift_tAFJhfMX106_0_33_D159C000482DC7D08B101F19BC946DA9Ll7PreviewfMf_15PreviewRegistryfMu_"
+            landmarkType = "37">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
 </Bucket>
