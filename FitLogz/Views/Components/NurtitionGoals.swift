@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct NurtitionGoals: View {
+    
+    @Binding var dailyNutrients:UserNutrients?
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Nutrition Goals")
@@ -15,10 +18,10 @@ struct NurtitionGoals: View {
                 .foregroundStyle(Color.defWhite)
             
             ForEach([
-                ("Calories", 2000, 1500),
-                ("Protein", 150, 100),
-                ("Carbs", 250, 180),
-                ("Fat", 70, 50),
+                ("Calories", 2000, dailyNutrients?.calories),
+                ("Protein", 150, dailyNutrients?.protein ),
+                ("Carbs", 250, dailyNutrients?.carbs),
+                ("Fat", 70, dailyNutrients?.fat),
             ], id: \.0) { nutrient, goal, current in
                 HStack(spacing: 12) {
 
@@ -27,12 +30,12 @@ struct NurtitionGoals: View {
                         .foregroundStyle(Color.defWhite.opacity(0.9))
                         .frame(width: 80, alignment: .leading) // Fixed width for alignment
                     
-                    ProgressView(value: Double(current), total: Double(goal))
+                    ProgressView(value: Double(current ?? 0), total: Double(goal))
                         .accentColor(.green)
                         .scaleEffect(x: 1, y: 2, anchor: .center)
                         .frame(height: 6)
                     
-                    Text("\(current) / \(goal)")
+                    Text("\(Int(current ?? 0)) / \(goal)")
                         .font(.caption2)
                         .foregroundStyle(Color.defWhite.opacity(0.7))
                         .frame(width: 70, alignment: .trailing)
@@ -48,5 +51,8 @@ struct NurtitionGoals: View {
 }
 
 #Preview {
-    NurtitionGoals()
+    
+    @Previewable @State var test :UserNutrients? = UserNutrients(calories: 1000, protein: 100, carbs: 100, fat: 100)
+    
+    NurtitionGoals(dailyNutrients: $test)
 }

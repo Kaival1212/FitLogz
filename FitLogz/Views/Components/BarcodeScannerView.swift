@@ -48,7 +48,7 @@ struct BarcodeScannerView: View {
                 } else {
                     VStack {
                         if let food = scannedFood {
-                            NutrimentsView(product: food)
+                            NutrimentsView(product: food , isPresented: $isPresented)
                         } else if let error = error {
                             ProductNotFoundError(scannedCode: scannedCode, error: error)
                         }

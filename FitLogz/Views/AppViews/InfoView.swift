@@ -136,7 +136,10 @@ struct InfoView: View {
                             .cornerRadius(20)
                         }
                         //.padding(.horizontal,10)
-                        .sheet(isPresented: $isShowingSheet) {
+                        .sheet(isPresented: $isShowingSheet , onDismiss: {
+                            AuthConnect.Singleton.getUsersHistory()
+
+                        }) {
                             WeighInView(isShowingSheet: $isShowingSheet)
                         }
                     }

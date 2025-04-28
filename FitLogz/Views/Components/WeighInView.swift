@@ -9,88 +9,72 @@ import SwiftUI
 
 struct WeighInView: View {
     
-    @Binding var isShowingSheet : Bool
-    @State var weight:Double?
-    @State var selectedUnit:String = "kg"
-    @State var errorMessage:String?
+    @Binding var isShowingSheet: Bool
+    var  onSaved: (() -> Void)? = nil
+    
+    @State private var weightText = ""
+    @State private var isSaving   = false
+    @State private var errorMsg   : String?
+    
+    private var weightValue: Double? {
+        Double(weightText.replacingOccurrences(of: ",", with: "."))
+    }
     
     var body: some View {
         ZStack {
-            Color.backGround
-                .ignoresSafeArea(.all)
-            VStack {
+            Color.backGround.ignoresSafeArea()
+            
+            VStack(spacing: 24) {
                 Text("Weigh In 📈")
                     .font(.custom("LilitaOne", size: 34))
-                    .fontWeight(.semibold)
                     .foregroundColor(.defWhite)
-                    .padding(.top)
                 
-                HStack {
-                    TextField("Enter your current weight", value: $weight , format: .number)
-                        .padding()
-                        .background(Color.defPrimary)
-                        .cornerRadius(10)
-                        .foregroundColor(.white)
-                        .keyboardType(.decimalPad)
-                    
-                    Menu {
-                        Button {
-                            selectedUnit = "kg"
-                        } label: {
-                            Label("Kilograms", systemImage: "scalemass")
-                                .font(.title3)
-                                .foregroundColor(.blue)
-                        }
-                        Button {
-                            selectedUnit = "lbs"
-                        } label: {
-                            Label("Pounds", systemImage: "figure.strengthtraining.traditional")
-                                .font(.title3)
-                                .foregroundColor(.blue)
-                        }
-                    } label: {
-                        HStack {
-                            Text("\(selectedUnit)")
-                                .font(.custom("LilitaOne", size: 16))
-                                .foregroundColor(.defWhite)
-                            Image(systemName: "arrow.down")
-                                .foregroundColor(.white)
-                        }
-                        .padding()
-                        .background(Color.defPrimary)
-                        .cornerRadius(10)
-
-                    }
+                TextField("Current weight (kg)", text: $weightText)
+                    .keyboardType(.decimalPad)
+                    .padding()
+                    .background(Color.defPrimary)
                     .cornerRadius(10)
-                }
-                .padding(.horizontal)
+                    .foregroundColor(.white)
+                    .padding(.horizontal)
                 
-                if errorMessage != nil {
-                    Text(errorMessage!)
-                        .foregroundColor(.red)
-                        .font(.footnote)
-                }
                 
-                Button("Submit") {
-                    print("loged Weight: \(weight ?? 0)")
-                    isShowingSheet = false
-                }
-                .disabled(weight == nil || weight == 0 || errorMessage != nil)
-                .padding()
-                .background(Color.defSecondary)
-                .foregroundColor(.white)
-                .cornerRadius(10)
-                .fontWeight(.semibold)
-                .padding(10)
-                .opacity(weight == nil || weight == 0 || errorMessage != nil ? 0.5 : 1)
-
-                
+                Button(isSaving ? "Saving…" : "Submit") { save() }
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.defSecondary)
+                    .cornerRadius(12)
+                    .foregroundColor(.white)
+                    .padding(.horizontal)
             }
         }
     }
+    
+
+    
+    private func save() {
+        guard let kg = weightValue else { return }
+        print("🌍 posting \(kg) kg")
+        isSaving = true
+        errorMsg = nil
+        
+        UserFoodApi.addWeight(weight: kg, unit: "kg") { result in
+            print("📬 got response:", result)
+            DispatchQueue.main.async {
+                isSaving = false
+                switch result {
+                case .success:
+                    onSaved?()
+                    isShowingSheet = false        // should dismiss here
+                case .failure(let err):
+                    errorMsg = err.localizedDescription
+                }
+            }
+        }
+    }
+
 }
 
 #Preview {
-    @Previewable @State var isShowingSheet: Bool = true
-    WeighInView(isShowingSheet: $isShowingSheet)
+    @Previewable @State var show = true
+    WeighInView(isShowingSheet: $show)
 }

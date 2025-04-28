@@ -11,6 +11,7 @@ struct NutrimentsView: View {
     
     var product: ProductNutriments
     @State var selection: String = "serving"
+    @Binding var isPresented: Bool
     @State var showNutriModal: Bool = false
     @State var Amount: String = "1"
     @State var success: Bool = false
@@ -53,8 +54,8 @@ struct NutrimentsView: View {
                 
                 HStack {
                     Picker(selection: $selection, label: Text("Unit")) {
-                        Text("Per serving").tag("serving")
-                        Text("Per 100g/ml").tag("100")
+                        if product.carbohydrates_serving != nil && product.energy_kcal_serving != nil { Text("Per serving").tag("serving")}
+                        if product.carbohydrates_100g != nil && product.energy_kcal_100g != nil {Text("Per 100g/ml").tag("100")}
                     }
                     .pickerStyle(SegmentedPickerStyle())
                     .padding(.trailing, 10)
@@ -149,6 +150,7 @@ struct NutrimentsView: View {
                     withAnimation {
                         success = true
                     }
+                        isPresented = false
                 case .failure(let error):
                     self.error = error.localizedDescription
                     print("Error: \(error)")
@@ -210,6 +212,6 @@ struct NutrimentsView_Previews: PreviewProvider {
             proteins_unit: "g"
         )
         
-        NutrimentsView(product: test)
+        NutrimentsView(product: test, isPresented: .constant(true))
     }
 }

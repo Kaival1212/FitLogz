@@ -11,6 +11,6 @@ import Foundation
 
 class ApiUrl {
     
-  //static let baseUrl = URL(string: "https://fitlogz.kaival.co.uk/api")!
-  static let baseUrl = URL(string: "http://127.0.0.1:8000/api")!
+  static let baseUrl = URL(string: "https://fitlogz.kaival.co.uk/api")!
+//static let baseUrl = URL(string: "http://127.0.0.1:8000/api")!
 }
